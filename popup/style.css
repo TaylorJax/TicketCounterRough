@@ -1,0 +1,9 @@
+table, td, th { border: 1px solid #ddd; text-align: left; }
+table { border-collapse: collapse; width: 100%; }
+th, td { padding: 8px; font-size: 12px; }
+#wrapper { min-width: 640px; }
+#hint { margin-top: 8px; font-size: 11px; opacity: .8; }
+#controls { display:flex; gap:8px; align-items:center; margin-bottom:8px; flex-wrap: wrap; }
+#filter { flex:1; min-width: 220px; padding:6px; font-size:12px; }
+button { padding:6px 10px; }
+#meta { font-size:11px; opacity: .75; margin-bottom:6px; }

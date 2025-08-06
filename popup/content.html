@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ticket Checker</title>
+    <link rel="stylesheet" type="text/css" href="style.css" />
+  </head>
+  <body>
+    <div id="wrapper">
+      <div id="controls">
+        <input id="filter" placeholder="Filter (e.g., GA, Lawn, 102)" />
+        <label title="Include resale/Official Platinum in counts"><input type="checkbox" id="inclResale"> Include resale</label>
+        <button id="refresh">Refresh</button>
+        <button id="csv">CSV</button>
+        <button id="dump">Dump</button>
+        <button id="reset">Reset</button>
+      </div>
+      <div id="meta"></div>
+      <table id="items">
+        <thead>
+          <tr>
+            <th>No</th>
+            <th>Section</th>
+            <th>Price Range</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div id="hint">Primary-only by default. Robust price range extraction. Pan/zoom map, then Refresh.</div>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
