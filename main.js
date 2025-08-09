@@ -6,6 +6,7 @@
   const captured = [];
   let sections = {};        
   let options = { includeResale: false };
+  const TOKEN = Math.random().toString(36).slice(2);
 
   function qsa(sel){ try { return Array.from(document.querySelectorAll(sel)); } catch(e){ return []; } }
 
@@ -23,8 +24,18 @@
       }
     }catch(e){}
   }
-  const mo = new MutationObserver(buildSectionMap);
+
+  let buildPending = false;
+  const mo = new MutationObserver(() => {
+    if (buildPending) return;
+    buildPending = true;
+    requestAnimationFrame(() => {
+      buildPending = false;
+      buildSectionMap();
+    });
+  });
   mo.observe(document.documentElement || document, {subtree:true, childList:true});
+  window.addEventListener("unload", () => mo.disconnect());
 
   function firstNonNull(...vals){
     for (const v of vals){ if (v !== undefined && v !== null) return v; }
@@ -32,16 +43,13 @@
   }
   function toNumber(x){
     if (x == null) return null;
-    // Support cents integers (like 12345 => $123.45)
     if (typeof x === "object"){
       const maybe = firstNonNull(x.value, x.amount, x.min, x.max);
       return toNumber(maybe);
     }
     const n = Number(x);
     if (!isFinite(n)) return null;
-    // If it's a large int with no decimals and > 500 but divisible by 5, might be in cents
     if (Number.isInteger(n) && n > 2000 && n % 5 === 0) {
-      // Heuristic: treat as cents if also too large to be face value (e.g. > 999)
       if (n > 999) return Math.round(n) / 100;
     }
     return n;
@@ -71,7 +79,6 @@
   }
 
   function extractPriceFromNode(node){
-    // Look for standard ranges
     const tryRange = (pr)=>{
       if (!pr) return [null,null];
       const min = toNumber(firstNonNull(pr.min, pr.low, pr.start, pr.faceValueMin, pr.minPrice, pr.priceMin, pr.amountMin, pr.from));
@@ -81,16 +88,13 @@
     if (Array.isArray(node.priceRange) && node.priceRange.length) return tryRange(node.priceRange[0]);
     if (Array.isArray(node.offerPriceRanges) && node.offerPriceRanges.length) return tryRange(node.offerPriceRanges[0]);
     if (Array.isArray(node.faceValues) && node.faceValues.length) return tryRange(node.faceValues[0]);
-    // Flat fields
     const flatMin = toNumber(firstNonNull(node.minPrice, node.low, node.start, node.faceValueMin, node.priceMin));
     const flatMax = toNumber(firstNonNull(node.maxPrice, node.high, node.end, node.faceValueMax, node.priceMax));
     if (flatMin != null || flatMax != null) return [flatMin, flatMax];
-    // Dive into offers/seats/items to derive min/max
     function scanArray(arr){
       let mn = null, mx = null;
       for (const it of arr){
         if (looksResaleOrPlatinum(it)) continue;
-        // common fields: price, listingPrice, total, amount, faceValue
         const candidates = [
           it.price, it.listingPrice, it.total, it.amount, it.faceValue, it.offerPrice, it.displayPrice, it.ticketPrice
         ];
@@ -155,7 +159,7 @@
   // Capture live payloads (ring buffer)
   window.addEventListener("message", (ev)=>{
     const data = ev.data;
-    if (data && data.__TM_INV__ && data.payload){
+    if (data && data.__TM_INV__ && data.payload && data.__TM_TOKEN__ === TOKEN){
       captured.push(data.payload);
       if (captured.length > CAP) captured.shift();
     }
@@ -164,6 +168,7 @@
   try{
     const s = document.createElement("script");
     s.src = chrome.runtime.getURL("page-hook.js");
+    s.dataset.tmToken = TOKEN;
     (document.head || document.documentElement).appendChild(s);
     s.onload = ()=> s.remove();
   }catch(e){}

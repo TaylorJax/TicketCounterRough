@@ -6,12 +6,10 @@
   "icons": {
     "48": "icons/border-48.png"
   },
-  "permissions": [
-    "activeTab",
-    "scripting"
-  ],
+  "permissions": ["activeTab"],
   "host_permissions": [
-    "<all_urls>"
+    "https://*.ticketmaster.*/*",
+    "https://*.livenation.*/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -23,23 +21,21 @@
   },
   "web_accessible_resources": [
     {
-      "resources": [
-        "page-hook.js"
-      ],
+      "resources": ["page-hook.js"],
       "matches": [
-        "<all_urls>"
+        "https://*.ticketmaster.*/*",
+        "https://*.livenation.*/*"
       ]
     }
   ],
   "content_scripts": [
     {
       "matches": [
-        "<all_urls>"
+        "https://*.ticketmaster.*/*",
+        "https://*.livenation.*/*"
       ],
       "all_frames": true,
-      "js": [
-        "main.js"
-      ],
+      "js": ["main.js"],
       "run_at": "document_start"
     }
   ]

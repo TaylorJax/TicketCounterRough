@@ -36,15 +36,22 @@ function requestData() {
   chrome.tabs.query({active:true, currentWindow:true}, function(tabs){
     if (!tabs || !tabs.length) return;
     includeResale = document.getElementById('inclResale').checked;
-    chrome.tabs.sendMessage(tabs[0].id, {from:'popup', subject:'getInfo', options:{includeResale}}, function(resp){
-      try { 
-        const obj = JSON.parse(resp); 
-        cachedRows = obj.rows || []; 
-        window.__capturedCount = obj.meta?.captured || 0;
-      } catch(e){ cachedRows = []; }
-      renderRows(cachedRows, {captured: window.__capturedCount});
-      applyFilter();
-    });
+    chrome.tabs.sendMessage(
+      tabs[0].id,
+      {from:'popup', subject:'getInfo', options:{includeResale}},
+      function(resp){
+        if (chrome.runtime.lastError) {
+          cachedRows = []; window.__capturedCount = 0; renderRows(cachedRows, {captured: 0}); return;
+        }
+        try { 
+          const obj = JSON.parse(resp); 
+          cachedRows = obj.rows || []; 
+          window.__capturedCount = obj.meta?.captured || 0;
+        } catch(e){ cachedRows = []; }
+        renderRows(cachedRows, {captured: window.__capturedCount});
+        applyFilter();
+      }
+    );
   });
 }
 
@@ -53,7 +60,7 @@ function toCSV(rows){
   const lines = [header.join(",")];
   let i=1;
   for (const r of rows){
-    lines.push([i, JSON.stringify(r.section??""), r.min??"", r.max??"", r.count??""].join(","));
+    lines.push([i, JSON.stringify(r.section||""), r.min||"", r.max||"", r.count||""].join(","));
     i++;
   }
   return lines.join("\n");
