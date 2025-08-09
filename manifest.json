@@ -1,0 +1,46 @@
+{
+  "manifest_version": 3,
+  "name": "Ticket Checker (Inventory Fix)",
+  "version": "2.9.0",
+  "description": "Primary inventory by section from live TM/LN APIs. Robust price ranges + debug tools.",
+  "icons": {
+    "48": "icons/border-48.png"
+  },
+  "permissions": [
+    "activeTab",
+    "scripting"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "action": {
+    "default_title": "Ticket Checker",
+    "default_icon": "icons/border-48.png",
+    "default_popup": "popup/content.html"
+  },
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "page-hook.js"
+      ],
+      "matches": [
+        "<all_urls>"
+      ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "all_frames": true,
+      "js": [
+        "main.js"
+      ],
+      "run_at": "document_start"
+    }
+  ]
+}
